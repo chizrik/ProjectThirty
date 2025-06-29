@@ -7,7 +7,7 @@ interface ChallengePlanInput {
   obstacles: string[]
 }
 
-interface ChallengePlan {
+export interface ChallengePlan {
   title: string
   description: string
   metrics: {

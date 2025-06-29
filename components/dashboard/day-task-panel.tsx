@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Upload, Star, CheckCircle, FileText, Image, Calendar } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
+import { DayProgress } from '@/types/challenge'
 
 interface DayTask {
   task: string

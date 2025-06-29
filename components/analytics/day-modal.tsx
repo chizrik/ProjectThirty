@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
+import { DayProgress } from '@/types/challenge'
 import { 
   Camera, 
   Upload, 
@@ -36,16 +37,7 @@ interface Task {
   completed: boolean
 }
 
-interface DayProgress {
-  day: number
-  completed_tasks: boolean[]
-  proof_text: string
-  proof_file?: string
-  completed_at?: string
-  motivation_rating?: number
-  difficulty_rating?: number
-  completion_rating?: number
-}
+// DayProgress type is imported from @/types/challenge
 
 interface DayModalProps {
   isOpen: boolean
@@ -110,7 +102,7 @@ export default function DayModal({
       // Load existing progress
       setTasks(prev => prev.map((task, index) => ({
         ...task,
-        completed: dayProgress.completed_tasks?.[index] || false
+        completed: dayProgress.completed || false
       })))
       
       setMotivationLevel([dayProgress.motivation_rating || 7])

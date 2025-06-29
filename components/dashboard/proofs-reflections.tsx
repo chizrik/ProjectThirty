@@ -9,17 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Camera, FileText, Search, Filter, Calendar, Star, Download, Eye, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
+import { DayProgress } from '@/types/challenge'
 
-interface DayData {
-  day: number
+type DayData = DayProgress & {
   tasks: { task_id: number; title: string; completed: boolean }[]
-  motivation: number
-  reflection: string
-  proof_upload_url: string
-  difficulty_rating: number
-  completion_rating: number
-  timestamp: string
-  status: 'neutral' | 'complete' | 'missed' | 'partial'
   hasProof: boolean
   hasReflection: boolean
 }

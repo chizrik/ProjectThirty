@@ -26,7 +26,7 @@ import {
   Shield,
   User
 } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
+import { createSupabaseClient } from '@/lib/supabase'
 import { toast } from 'sonner'
 
 interface ChallengeSettingsProps {
@@ -106,7 +106,7 @@ export default function ChallengeSettings({
     weekendMode: false
   })
   
-  const supabase = createClient()
+  const supabase = createSupabaseClient()
   
   useEffect(() => {
     loadSettings()

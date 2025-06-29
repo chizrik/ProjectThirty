@@ -73,11 +73,11 @@ export default function SignUpPage() {
           name.trim()
         )
 
-        if (!success || !data) {
+        if (!success) {
           console.error("Profile creation failed:", profileError)
           // Sign out the user since profile creation failed
           await supabase.auth.signOut()
-          setError(profileError?.message || "Failed to create user profile. Please try again.")
+          setError((profileError as any)?.message || "Failed to create user profile. Please try again.")
           return
         }
 

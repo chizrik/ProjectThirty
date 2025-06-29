@@ -10,6 +10,8 @@ import { ProgressStreakControls } from './progress-streak-controls'
 import { AnalyticsTrendsPanel } from './analytics-trends-panel'
 import { ProofsReflectionsHub } from './proofs-reflections-hub'
 import { SettingsToolsPanel } from './settings-tools-panel'
+import { Challenge, DayProgress } from '@/types/challenge'
+import { ChallengePlan } from '@/lib/generateChallengePlan'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -27,7 +29,9 @@ interface Day {
   tasks: Task[]
 }
 
-interface ChallengePlan {
+// ChallengePlan type is imported from @/types/challenge
+
+interface LocalChallengePlan {
   id: string
   user_id: string
   title: string

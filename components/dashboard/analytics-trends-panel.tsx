@@ -11,6 +11,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { TrendingUp, BarChart2, CalendarIcon, ChevronDown, ChevronUp, Lightbulb, Users, Activity } from 'lucide-react'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
+import { Challenge, DayProgress } from '@/types/challenge'
 
 // Dynamically import chart components to avoid SSR issues
 const ResponsiveContainer = dynamic(

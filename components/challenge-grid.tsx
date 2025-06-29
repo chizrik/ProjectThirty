@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress'
 import { CheckCircle, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { createSupabaseClient } from '@/lib/supabase'
+import { DayProgress } from '@/types/challenge'
+import { ChallengePlan } from '@/lib/generateChallengePlan'
 
 interface DailyProgress {
   id: string
@@ -17,19 +19,7 @@ interface DailyProgress {
   notes: string
 }
 
-interface ChallengePlan {
-  id: string
-  title: string
-  description: string
-  start_date: string
-  duration_days: number
-  metrics: {
-    success_likelihood: number
-    effort_level: string
-    time_per_day: number
-  }
-  daily_progress: DailyProgress[]
-}
+// ChallengePlan type is imported from @/types/challenge
 
 export function ChallengeGrid() {
   const [challenge, setChallenge] = useState<ChallengePlan | null>(null)

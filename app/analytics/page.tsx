@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Challenge, DayProgress, AnalyticsData } from '@/types/challenge'
+import { ChallengePlan } from '@/lib/generateChallengePlan'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -84,26 +86,9 @@ const Legend = dynamic(
   { ssr: false }
 )
 
-interface DayProgress {
-  day: number
-  completed_tasks: boolean[]
-  proof_text: string
-  proof_file?: string
-  completed_at: string
-  motivation_rating?: number
-  difficulty_rating?: number
-  completion_rating?: number
-}
+// DayProgress and Challenge types are imported from @/types/challenge
 
-interface Challenge {
-  id: string
-  title: string
-  description: string
-  category: string
-  created_at: string
-}
-
-interface AnalyticsData {
+interface LocalAnalyticsData {
   totalDaysCompleted: number
   currentStreak: number
   longestStreak: number
@@ -123,7 +108,7 @@ export default function AnalyticsDashboard() {
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null)
   const [dailyProgress, setDailyProgress] = useState<DayProgress[]>([])
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
+  const [analyticsData, setAnalyticsData] = useState<LocalAnalyticsData | null>(null)
   const [expandedSections, setExpandedSections] = useState({
     overview: true,
     grid: true,

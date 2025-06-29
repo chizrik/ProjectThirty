@@ -22,7 +22,7 @@ import {
   Trash2,
   AlertTriangle
 } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
+import { createSupabaseClient } from '@/lib/supabase'
 import { toast } from 'sonner'
 
 interface DayData {
@@ -64,7 +64,7 @@ export default function ExportTools({
   const [isResetting, setIsResetting] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   
-  const supabase = createClient()
+  const supabase = createSupabaseClient()
 
   // Calculate statistics for export preview
   const stats = {

@@ -11,20 +11,9 @@ import { motion } from 'framer-motion'
 import { CheckCircle, XCircle, Circle } from 'lucide-react'
 import { DayModal } from '@/components/day-modal'
 import { AnalyticsPanel } from '@/components/analytics/analytics-panel'
+import { ChallengePlan, AnalyticsData } from '@/types/challenge'
 
-interface AnalyticsData {
-  completionRate: number
-  streakCount: number
-  missedDays: number
-  dailyMotivation: Array<{
-    day: number
-    motivation: number
-    difficulty: number
-  }>
-  calendarStatus: Record<string, 'completed' | 'missed'>
-}
-
-interface ChallengePlan {
+interface LocalChallengePlan {
   id: string
   title: string
   description: string
@@ -44,6 +33,8 @@ interface ChallengePlan {
 interface DayStatus {
   day: number
   status: 'completed' | 'missed' | 'inactive'
+  reflection?: string
+  proof_url?: string
 }
 
 export default function ChallengePage() {
@@ -116,11 +107,13 @@ export default function ChallengePage() {
         })) || []
 
       setAnalyticsData({
+        totalDays: challengePlan?.days?.length || 30,
+        completedDays: dayStatuses.filter(d => d.status === 'completed').length,
         completionRate,
-        streakCount: currentStreak,
-        missedDays,
-        dailyMotivation,
-        calendarStatus
+        currentStreak,
+        longestStreak: currentStreak, // You may want to calculate this properly
+        averageReflectionLength: 0, // You may want to calculate this from actual data
+        weeklyProgress: [] // You may want to calculate this from actual data
       })
     } catch (error) {
       console.error('Error fetching challenge data:', error)

@@ -17,28 +17,7 @@ import StreakTracker from '@/components/dashboard/streak-tracker'
 import ProofsReflections from '@/components/dashboard/proofs-reflections'
 import ExportTools from '@/components/dashboard/export-tools'
 import ChallengeSettings from '@/components/dashboard/challenge-settings'
-
-interface Challenge {
-  id: string
-  title: string
-  description: string
-  category: string
-  created_at: string
-}
-
-interface DayProgress {
-  id: string
-  day: number
-  completed_tasks: boolean[]
-  proof_text: string
-  proof_file: string | null
-  motivation?: number
-  difficulty_rating?: number
-  completion_rating?: number
-  reflection?: string
-  completed_at: string
-  status: 'neutral' | 'complete' | 'missed' | 'partial'
-}
+import { Challenge, DayProgress } from '@/types/challenge'
 
 interface DayData {
   day: number
@@ -120,17 +99,15 @@ export default function ChallengeDashboard() {
     
     for (let day = 1; day <= 30; day++) {
       const progress = dailyProgress.find(p => p.day === day)
-      const completedTasks = progress?.completed_tasks || [false, false, false]
-      const completedCount = completedTasks.filter(Boolean).length
+      const isCompleted = progress?.completed || false
       
       let status: 'neutral' | 'complete' | 'missed' | 'partial' = 'neutral'
-      if (completedCount === 3) status = 'complete'
-      else if (completedCount > 0) status = 'partial'
+      if (isCompleted) status = 'complete'
       else if (day < getCurrentDay()) status = 'missed'
       
       const tasks = defaultTasks.map((task, index) => ({
         ...task,
-        completed: completedTasks[index] || false
+        completed: (progress?.completed_tasks as number[] || [])[index] || false
       }))
 
       days.push({

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import dynamic from 'next/dynamic';
 import { Calendar } from '@/components/ui/calendar';
 import { CheckCircle2, XCircle, Trophy, Calendar as CalendarIcon, TrendingUp } from 'lucide-react';
+import { Challenge, DayProgress } from '@/types/challenge';
 
 const ResponsiveContainer = dynamic(
   () => import('recharts').then((mod) => mod.ResponsiveContainer),

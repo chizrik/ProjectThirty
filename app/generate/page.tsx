@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createSupabaseClient } from '@/lib/supabase'
+import { ChallengePlan } from '@/lib/generateChallengePlan'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,7 +41,7 @@ export default function GeneratePage() {
   const [obstacles, setObstacles] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [generatedPlan, setGeneratedPlan] = useState(null)
+  const [generatedPlan, setGeneratedPlan] = useState<ChallengePlan | null>(null)
   const [showPreview, setShowPreview] = useState(false)
 
   const router = useRouter()
@@ -256,7 +257,7 @@ export default function GeneratePage() {
                 <div className="space-y-2">
                   <h4 className="font-medium">Specific Goals</h4>
                   <div className="space-y-1">
-                    {generatedPlan?.metrics?.specific_goals?.map((goal: string, i: number) => (
+                    {(generatedPlan?.metrics?.specific_goals as string[] || []).map((goal: string, i: number) => (
                       <div key={i} className="flex items-start gap-2 text-sm">
                         <Target className="w-4 h-4 text-blue-500 mt-1" />
                         <span>{goal}</span>

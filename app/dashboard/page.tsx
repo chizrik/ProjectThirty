@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, BarChart, Flame, Plus, ArrowRight, CheckCircle, XCircle, Circle } from 'lucide-react'
 import { toast } from 'sonner'
+import { Challenge, ChallengePlan } from '@/types/challenge'
 
 interface ChallengeSummary {
   id: string
@@ -146,8 +147,8 @@ export default function DashboardPage() {
           
           // Calculate completed days and streak
           const completedDays = (progressData || []).filter(p => {
-            // Check if completed_tasks array has at least one true value
-            return Array.isArray(p.completed_tasks) && p.completed_tasks.some(task => task === true)
+            // Check if the day is completed
+            return p.completed === true
           }).length
           
           // Calculate streak (simplified version)
@@ -155,8 +156,7 @@ export default function DashboardPage() {
           const sortedProgress = [...(progressData || [])].sort((a, b) => a.day - b.day)
           
           for (let i = sortedProgress.length - 1; i >= 0; i--) {
-            if (Array.isArray(sortedProgress[i].completed_tasks) && 
-                sortedProgress[i].completed_tasks.some(task => task === true)) {
+            if (sortedProgress[i].completed) {
               streakCount++
             } else {
               break

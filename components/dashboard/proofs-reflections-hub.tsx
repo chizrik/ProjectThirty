@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { FileText, Image, ChevronDown, ChevronUp, ExternalLink, Calendar, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { DayProgress } from '@/types/challenge'
 
 interface ProofItem {
   day: number

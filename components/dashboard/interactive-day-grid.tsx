@@ -5,13 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CheckCircle, XCircle, Circle, FileText, Image } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-interface DayProgress {
-  day: number
-  status: 'completed' | 'missed' | 'pending'
-  hasReflection?: boolean
-  hasProof?: boolean
-}
+import { DayProgress } from '@/types/challenge'
 
 interface DayTask {
   task: string

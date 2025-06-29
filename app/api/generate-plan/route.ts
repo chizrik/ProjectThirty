@@ -1,26 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { generateChallengePlan } from '@/lib/generateChallengePlan'
-
-interface ChallengePlan {
-  title: string
-  description: string
-  metrics: {
-    success_likelihood: number
-    effort_level: string
-    time_per_day: number
-    difficulty_level: string
-  }
-  specific_goals: string[]
-  potential_obstacles: string[]
-  days: Array<{
-    day: number
-    tasks: string[]
-    tips?: string[]
-    bonus_task?: string
-    difficulty_rating?: number
-  }>
-}
+import { generateChallengePlan, ChallengePlan } from '@/lib/generateChallengePlan'
 
 // Validate environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -152,7 +132,7 @@ export async function POST(request: Request) {
       }
       
       // Validate each day has the required structure
-      daysData.forEach((day, index) => {
+      daysData.forEach((day: any, index) => {
         if (!day.day || !Array.isArray(day.tasks)) {
           throw new Error(`Day ${index + 1} is missing required fields (day number or tasks array)`);
         }
@@ -166,7 +146,7 @@ export async function POST(request: Request) {
         }
         
         // Ensure tasks are strings
-        day.tasks = day.tasks.map(task => String(task));
+        day.tasks = day.tasks.map((task: any) => String(task));
       });
       
       // Ensure daysData is in the correct format for JSONB
