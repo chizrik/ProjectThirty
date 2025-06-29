@@ -60,8 +60,15 @@ pnpm install
 3. Set up environment variables:
 ```bash
 cp .env.example .env.local
-# Add your Supabase and Groq API keys
 ```
+
+Edit `.env.local` and add your credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+```
+
+Get these from your [Supabase Dashboard](https://app.supabase.com) → Project Settings → API
 
 4. Run the development server:
 ```bash
@@ -69,6 +76,26 @@ pnpm dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Deployment
+
+### Vercel Deployment
+
+1. Push your code to GitHub
+2. Connect your repository to [Vercel](https://vercel.com)
+3. Add environment variables in Vercel Dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `SUPABASE_SERVICE_KEY`
+4. Deploy automatically
+
+**Important**: This app uses API routes and cannot be statically exported. The configuration is already set for Vercel serverless deployment.
+
+### Environment Variables Required
+
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_SERVICE_KEY`: Your Supabase service role key (for API routes)
+
+**Security Note**: Never commit `.env.local` or expose service keys in client-side code.
 
 ## Docker Support
 
@@ -84,4 +111,4 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-"# ProjectThirty" 
+"# ProjectThirty"

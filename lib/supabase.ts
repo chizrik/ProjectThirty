@@ -1,5 +1,5 @@
-import { createBrowserClient, createServerClient } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
+import { createBrowserClient, createServerClient } from "@supabase/ssr"
 import type { NextRequest, NextResponse } from "next/server"
 
 // Get environment variables with fallbacks
