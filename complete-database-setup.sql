@@ -64,6 +64,8 @@ CREATE TABLE public.daily_progress (
   proof_text TEXT DEFAULT '',
   proof_file TEXT,
   motivation_level INTEGER CHECK (motivation_level >= 1 AND motivation_level <= 10),
+  difficulty_rating INTEGER CHECK (difficulty_rating >= 1 AND difficulty_rating <= 10),
+  completion_rating INTEGER CHECK (completion_rating >= 1 AND completion_rating <= 10),
   completed_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

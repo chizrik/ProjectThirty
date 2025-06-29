@@ -13,9 +13,9 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function POST(request: Request) {
   try {
-    const { user_id, day, difficulty, motivation, completion, reflection } = await request.json()
+    const { user_id, day, difficulty_rating, motivation_rating, completion_rating, reflection } = await request.json()
 
-    if (!user_id || !day || !difficulty || !motivation || !completion || !reflection) {
+    if (!user_id || !day || !difficulty_rating || !motivation_rating || !completion_rating || !reflection) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -47,7 +47,15 @@ export async function POST(request: Request) {
         content: 'You are a helpful assistant that always responds in valid JSON format.'
       }, {
           role: 'user',
-          content: `Generate personalized feedback and a bonus task based on this daily reflection:\n\nDay: ${day}\nDifficulty Rating: ${difficulty}/10\nMotivation Level: ${motivation}/10\nCompletion Rate: ${completion}/10\nReflection: ${reflection}\n\nProvide encouraging feedback that addresses their experience and a specific bonus task to help them improve. Format the response as a JSON object with 'ai_feedback' and 'bonus_task' fields.`
+          content: `Generate personalized feedback and a bonus task based on this daily reflection:
+
+Day: ${day}
+Difficulty Rating: ${difficulty_rating}/10
+Motivation Level: ${motivation_rating}/10
+Completion Rate: ${completion_rating}/10
+Reflection: ${reflection}
+
+Provide encouraging feedback that addresses their experience and a specific bonus task to help them improve. Format the response as a JSON object with 'ai_feedback' and 'bonus_task' fields.`
         }],
         max_tokens: 3000,
         temperature: 0.7,
@@ -88,17 +96,18 @@ export async function POST(request: Request) {
 
     // Store the reflection and AI feedback in Supabase
     const { data, error } = await supabase
-      .from('daily_reflections')
+      .from('daily_progress')
       .upsert([
         {
           user_id,
           day,
-          difficulty,
-          motivation,
-          completion,
+          completed: true,
+          motivation_level: motivation_rating,
           reflection,
           ai_feedback: parsedContent.ai_feedback,
-          bonus_task: parsedContent.bonus_task
+          bonus_task: parsedContent.bonus_task,
+          difficulty_rating,
+          completion_rating
         }
       ])
       .select()

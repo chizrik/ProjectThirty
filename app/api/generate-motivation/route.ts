@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     // Fetch user's recent reflections and progress
     const { data: reflections, error: reflectionsError } = await supabase
-      .from('daily_reflections')
+      .from('daily_progress')
       .select('*')
       .eq('user_id', user_id)
       .order('day', { ascending: false })

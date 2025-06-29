@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     // Fetch user's progress data from Supabase
     const { data: reflections, error: reflectionsError } = await supabase
-      .from('daily_reflections')
+      .from('daily_progress')
       .select('*')
       .eq('user_id', user_id)
       .order('day', { ascending: true })
@@ -83,10 +83,10 @@ export async function POST(request: Request) {
     // Prepare progress data for analysis
     const progressData = reflections.map(r => ({
       day: r.day,
-      difficulty: r.difficulty,
-      motivation: r.motivation,
-      completion: r.completion,
-      reflection: r.reflection
+      completed: r.completed,
+      motivation_level: r.motivation_level,
+      reflection: r.reflection,
+      ai_feedback: r.ai_feedback
     }))
 
     const apiKey = process.env.GROQ_API_KEY
