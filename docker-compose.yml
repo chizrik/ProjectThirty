@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_SUPABASE_URL=https://omooihukmymuwgtidkww.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tb29paHVrbXltdXdndGlka3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2ODY0MDMsImV4cCI6MjA2NjI2MjQwM30.2gH7CHMUlnDzZGB-Ii2CmoVQ2FI2la_99I12mEye7vg
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
