@@ -65,10 +65,13 @@ cp .env.example .env.local
 Edit `.env.local` and add your credentials:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+GROQ_API_KEY=your_groq_api_key
 SUPABASE_SERVICE_KEY=your_supabase_service_role_key
 ```
 
-Get these from your [Supabase Dashboard](https://app.supabase.com) → Project Settings → API
+Get Supabase credentials from your [Supabase Dashboard](https://app.supabase.com) → Project Settings → API
+Get Groq API key from [Groq Console](https://console.groq.com/keys)
 
 4. Run the development server:
 ```bash
@@ -79,20 +82,39 @@ pnpm dev
 
 ## Deployment
 
+### Quick Deployment
+
+Use the automated deployment script:
+```bash
+# Windows PowerShell
+.\deploy.ps1
+
+# Or manually:
+npm run build
+git add .
+git commit -m "Deploy to production"
+git push origin main
+```
+
 ### Vercel Deployment
 
-1. Push your code to GitHub
-2. Connect your repository to [Vercel](https://vercel.com)
-3. Add environment variables in Vercel Dashboard:
+1. **Database Setup**: Run `complete-database-setup.sql` in your Supabase SQL Editor
+2. Push your code to GitHub
+3. Connect your repository to [Vercel](https://vercel.com)
+4. Add environment variables in Vercel Dashboard:
    - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `GROQ_API_KEY`
    - `SUPABASE_SERVICE_KEY`
-4. Deploy automatically
+5. Deploy automatically
 
 **Important**: This app uses API routes and cannot be statically exported. The configuration is already set for Vercel serverless deployment.
 
 ### Environment Variables Required
 
 - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `GROQ_API_KEY`: Your Groq API key for AI challenge generation
 - `SUPABASE_SERVICE_KEY`: Your Supabase service role key (for API routes)
 
 **Security Note**: Never commit `.env.local` or expose service keys in client-side code.

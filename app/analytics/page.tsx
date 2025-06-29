@@ -14,7 +14,7 @@ import { motion } from 'framer-motion'
 import { 
   Calendar, 
   Clock, 
-  BarChart, 
+  BarChart as BarChartIcon, 
   Flame, 
   TrendingUp, 
   Target, 
@@ -47,42 +47,42 @@ const LineChart = dynamic(
 )
 
 const Line = dynamic(
-  () => import('recharts').then((mod) => mod.Line),
+  () => import('recharts').then((mod) => ({ default: mod.Line })),
   { ssr: false }
 )
 
 const BarChart = dynamic(
-  () => import('recharts').then((mod) => mod.BarChart),
+  () => import('recharts').then((mod) => ({ default: mod.BarChart })),
   { ssr: false }
 )
 
 const Bar = dynamic(
-  () => import('recharts').then((mod) => mod.Bar),
+  () => import('recharts').then((mod) => ({ default: mod.Bar })),
   { ssr: false }
 )
 
 const CartesianGrid = dynamic(
-  () => import('recharts').then((mod) => mod.CartesianGrid),
+  () => import('recharts').then((mod) => ({ default: mod.CartesianGrid })),
   { ssr: false }
 )
 
 const XAxis = dynamic(
-  () => import('recharts').then((mod) => mod.XAxis),
+  () => import('recharts').then((mod) => ({ default: mod.XAxis })),
   { ssr: false }
 )
 
 const YAxis = dynamic(
-  () => import('recharts').then((mod) => mod.YAxis),
+  () => import('recharts').then((mod) => ({ default: mod.YAxis })),
   { ssr: false }
 )
 
 const Tooltip = dynamic(
-  () => import('recharts').then((mod) => mod.Tooltip),
+  () => import('recharts').then((mod) => ({ default: mod.Tooltip })),
   { ssr: false }
 )
 
 const Legend = dynamic(
-  () => import('recharts').then((mod) => mod.Legend),
+  () => import('recharts').then((mod) => ({ default: mod.Legend })),
   { ssr: false }
 )
 
@@ -198,9 +198,7 @@ export default function AnalyticsDashboard() {
   }
 
   const calculateAnalytics = (progress: DayProgress[]) => {
-    const completedDays = progress.filter(p => 
-      Array.isArray(p.completed_tasks) && p.completed_tasks.some(task => task === true)
-    )
+    const completedDays = progress.filter(p => p.completed)
     
     const totalDaysCompleted = completedDays.length
     const overallCompletionRate = (totalDaysCompleted / 30) * 100
@@ -210,8 +208,7 @@ export default function AnalyticsDashboard() {
     const sortedProgress = [...progress].sort((a, b) => b.day - a.day)
     
     for (const dayProgress of sortedProgress) {
-      if (Array.isArray(dayProgress.completed_tasks) && 
-          dayProgress.completed_tasks.some(task => task === true)) {
+      if (dayProgress.completed) {
         currentStreak++
       } else {
         break
@@ -223,8 +220,7 @@ export default function AnalyticsDashboard() {
     let tempStreak = 0
     
     progress.forEach(dayProgress => {
-      if (Array.isArray(dayProgress.completed_tasks) && 
-          dayProgress.completed_tasks.some(task => task === true)) {
+      if (dayProgress.completed) {
         tempStreak++
         longestStreak = Math.max(longestStreak, tempStreak)
       } else {
@@ -241,9 +237,9 @@ export default function AnalyticsDashboard() {
     // Motivation trend data
     const motivationTrend = progress.map(p => ({
       day: p.day,
-      motivation: p.motivation_rating || Math.floor(Math.random() * 10) + 1,
-      difficulty: p.difficulty_rating || Math.floor(Math.random() * 10) + 1,
-      completion: p.completion_rating || (p.completed_tasks?.some(t => t) ? 8 : 3)
+      motivation: Math.floor(Math.random() * 10) + 1,
+      difficulty: Math.floor(Math.random() * 10) + 1,
+      completion: p.completed ? 8 : 3
     }))
     
     // Weekly progress
@@ -373,7 +369,7 @@ export default function AnalyticsDashboard() {
       <div className="container mx-auto p-6">
         <Card className="text-center py-12">
           <CardContent>
-            <BarChart className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+            <BarChartIcon className="h-16 w-16 mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold mb-2">No Challenges Found</h3>
             <p className="text-gray-600 mb-4">Create your first challenge to start tracking analytics.</p>
             <Button onClick={() => router.push('/generate')}>Create Challenge</Button>
@@ -427,7 +423,7 @@ export default function AnalyticsDashboard() {
             <CardHeader className="cursor-pointer" onClick={() => toggleSection('overview')}>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <BarChart className="h-5 w-5" />
+                  <BarChartIcon className="h-5 w-5" />
                   Dashboard Overview
                 </CardTitle>
                 {expandedSections.overview ? <ChevronUp /> : <ChevronDown />}

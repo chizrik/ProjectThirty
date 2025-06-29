@@ -18,7 +18,22 @@ export const createSupabaseClient = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Missing Supabase environment variables. Please check your .env.local file.")
   }
-  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'challenge-craft'
+      }
+    },
+    db: {
+      schema: 'public'
+    }
+  })
 }
 
 // For server-side usage in App Router

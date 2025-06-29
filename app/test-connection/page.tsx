@@ -1,10 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { createSupabaseClient } from "@/lib/supabase"
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { createSupabaseClient } from '@/lib/supabase'
 
 export default function TestConnectionPage() {
   const [testResults, setTestResults] = useState<any>(null)

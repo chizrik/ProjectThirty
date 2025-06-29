@@ -29,12 +29,21 @@ export default function SignInPage() {
     setError("")
 
     try {
+      // Add connection test before authentication
+      console.log('Testing Supabase connection...')
+      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log('Environment check:', {
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing',
+        key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Missing'
+      })
+      
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password,
       })
 
       if (signInError) {
+        console.error('Supabase auth error:', signInError)
         throw signInError
       }
 
@@ -45,8 +54,22 @@ export default function SignInPage() {
       // Redirect to dashboard after successful login
       router.push("/dashboard")
     } catch (err: any) {
-      console.error("Signin error:", err)
-      setError(err.message || "An error occurred during signin")
+      console.error('Full error details:', {
+        message: err.message,
+        name: err.name,
+        stack: err.stack,
+        cause: err.cause
+      })
+      
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        setError('Cannot connect to authentication service. Please check your internet connection and try again. If the problem persists, the service may be temporarily unavailable.')
+      } else if (err.message?.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please check your credentials and try again.')
+      } else if (err.message?.includes('Email not confirmed')) {
+        setError('Please check your email and click the confirmation link before signing in.')
+      } else {
+        setError(err.message || 'An unexpected error occurred during signin')
+      }
     } finally {
       setLoading(false)
     }

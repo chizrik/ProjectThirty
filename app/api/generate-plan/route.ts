@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { generateChallengePlan, ChallengePlan } from '@/lib/generateChallengePlan'
 
 // Validate environment variables
