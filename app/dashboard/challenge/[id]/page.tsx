@@ -17,21 +17,7 @@ import StreakTracker from '@/components/dashboard/streak-tracker'
 import ProofsReflections from '@/components/dashboard/proofs-reflections'
 import ExportTools from '@/components/dashboard/export-tools'
 import ChallengeSettings from '@/components/dashboard/challenge-settings'
-import { Challenge, DayProgress } from '@/types/challenge'
-
-interface DayData {
-  day: number
-  tasks: { task_id: number; title: string; completed: boolean }[]
-  motivation: number
-  reflection: string
-  proof_upload_url: string
-  difficulty_rating: number
-  completion_rating: number
-  timestamp: string
-  status: 'neutral' | 'complete' | 'missed' | 'partial'
-  hasProof: boolean
-  hasReflection: boolean
-}
+import { Challenge, DayProgress, DayData } from '@/types/challenge'
 
 const defaultTasks = [
   { task_id: 1, title: 'Morning routine completion', completed: false },
@@ -107,7 +93,7 @@ export default function ChallengeDashboard() {
       
       const tasks = defaultTasks.map((task, index) => ({
         ...task,
-        completed: (progress?.completed_tasks as number[] || [])[index] || false
+        completed: (progress?.completed_tasks as boolean[] || [])[index] || false
       }))
 
       days.push({
@@ -115,7 +101,7 @@ export default function ChallengeDashboard() {
         tasks,
         motivation: progress?.motivation || 5,
         reflection: progress?.proof_text || '',
-        proof_upload_url: progress?.proof_file || '',
+        proof_file: progress?.proof_file || '',
         difficulty_rating: progress?.difficulty_rating || 5,
         completion_rating: progress?.completion_rating || 5,
         timestamp: progress?.completed_at || new Date().toISOString(),
@@ -130,7 +116,7 @@ export default function ChallengeDashboard() {
 
   const getCurrentDay = () => {
     if (!challenge) return 1
-    const startDate = new Date(challenge.created_at)
+    const startDate = new Date(challenge.created_at || new Date().toISOString())
     const today = new Date()
     const diffTime = Math.abs(today.getTime() - startDate.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -171,7 +157,7 @@ export default function ChallengeDashboard() {
       tasks: defaultTasks,
       motivation: 5,
       reflection: '',
-      proof_upload_url: '',
+      proof_file: '',
       difficulty_rating: 5,
       completion_rating: 5,
       timestamp: new Date().toISOString(),
@@ -184,7 +170,7 @@ export default function ChallengeDashboard() {
     setIsDayModalOpen(false)
   }
 
-  const getDayColor = (status: string) => {
+  const getDayColor = (status: string | undefined) => {
     switch (status) {
       case 'complete': return 'bg-green-500 hover:bg-green-600'
       case 'partial': return 'bg-yellow-500 hover:bg-yellow-600'

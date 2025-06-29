@@ -5,20 +5,7 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { TrendingUp, Target, Calendar, Award } from 'lucide-react'
-
-interface DayData {
-  day: number
-  tasks: { task_id: number; title: string; completed: boolean }[]
-  motivation: number
-  reflection: string
-  proof_upload_url: string
-  difficulty_rating: number
-  completion_rating: number
-  timestamp: string
-  status: 'neutral' | 'complete' | 'missed' | 'partial'
-  hasProof: boolean
-  hasReflection: boolean
-}
+import { DayData } from '@/types/challenge'
 
 interface Stats {
   completed: number
@@ -77,7 +64,7 @@ export default function AnalyticsOverview({ dayData, stats, currentStreak }: Ana
   // Average motivation
   const activeDays = dayData.filter(d => d.status !== 'neutral')
   const avgMotivation = activeDays.length > 0 
-    ? Math.round(activeDays.reduce((sum, day) => sum + day.motivation, 0) / activeDays.length * 10) / 10
+    ? Math.round(activeDays.reduce((sum, day) => sum + (day.motivation || 0), 0) / activeDays.length * 10) / 10
     : 0
 
   // Proof and reflection rates

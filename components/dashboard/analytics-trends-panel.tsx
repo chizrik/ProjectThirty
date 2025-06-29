@@ -14,46 +14,21 @@ import dynamic from 'next/dynamic'
 import { Challenge, DayProgress } from '@/types/challenge'
 
 // Dynamically import chart components to avoid SSR issues
-const ResponsiveContainer = dynamic(
-  () => import('recharts').then((mod) => mod.ResponsiveContainer),
-  { ssr: false }
-)
-const LineChart = dynamic(
-  () => import('recharts').then((mod) => mod.LineChart),
-  { ssr: false }
-)
-const BarChart = dynamic(
-  () => import('recharts').then((mod) => mod.BarChart),
-  { ssr: false }
-)
-const Line = dynamic(
-  () => import('recharts').then((mod) => mod.Line),
-  { ssr: false }
-)
-const Bar = dynamic(
-  () => import('recharts').then((mod) => mod.Bar),
-  { ssr: false }
-)
-const XAxis = dynamic(
-  () => import('recharts').then((mod) => mod.XAxis),
-  { ssr: false }
-)
-const YAxis = dynamic(
-  () => import('recharts').then((mod) => mod.YAxis),
-  { ssr: false }
-)
-const CartesianGrid = dynamic(
-  () => import('recharts').then((mod) => mod.CartesianGrid),
-  { ssr: false }
-)
-const Tooltip = dynamic(
-  () => import('recharts').then((mod) => mod.Tooltip),
-  { ssr: false }
-)
-const Legend = dynamic(
-  () => import('recharts').then((mod) => mod.Legend),
-  { ssr: false }
-)
+const RechartsComponents = {
+  LineChart: dynamic(() => import('recharts').then(mod => ({ default: mod.LineChart })), { ssr: false }),
+  Line: dynamic(() => import('recharts').then(mod => ({ default: mod.Line as any })), { ssr: false }),
+  XAxis: dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis as any })), { ssr: false }),
+  YAxis: dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis as any })), { ssr: false }),
+  CartesianGrid: dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false }),
+  Tooltip: dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip as any })), { ssr: false }),
+  ResponsiveContainer: dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false }),
+  BarChart: dynamic(() => import('recharts').then(mod => ({ default: mod.BarChart })), { ssr: false }),
+  Bar: dynamic(() => import('recharts').then(mod => ({ default: mod.Bar as any })), { ssr: false }),
+  PieChart: dynamic(() => import('recharts').then(mod => ({ default: mod.PieChart })), { ssr: false }),
+  Pie: dynamic(() => import('recharts').then(mod => ({ default: mod.Pie as any })), { ssr: false }),
+  Cell: dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })), { ssr: false }),
+  Legend: dynamic(() => import('recharts').then(mod => ({ default: mod.Legend as any })), { ssr: false })
+}
 
 interface DailyData {
   day: number
@@ -226,36 +201,40 @@ export function AnalyticsTrendsPanel({
                   </div>
                   
                   <div className="h-[300px] w-full bg-white dark:bg-slate-800/50 rounded-lg p-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
+                    <RechartsComponents.ResponsiveContainer width="100%" height="100%">
+                      <RechartsComponents.LineChart
                         data={dailyData}
                         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis 
+                        <RechartsComponents.CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <RechartsComponents.XAxis 
                           dataKey="day" 
                           stroke="#64748b"
                           tick={{ fill: '#64748b' }}
+                          {...({} as any)}
                         />
-                        <YAxis 
+                        <RechartsComponents.YAxis 
                           stroke="#64748b"
                           tick={{ fill: '#64748b' }}
+                          {...({} as any)}
                         />
-                        <Tooltip 
+                        <RechartsComponents.Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#ffffff', 
                             border: '1px solid #e2e8f0',
                             borderRadius: '8px',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                          }} 
+                          }}
+                          {...({} as any)}
                         />
-                        <Legend 
+                        <RechartsComponents.Legend 
                           wrapperStyle={{
                             paddingTop: '20px',
                             color: '#64748b'
                           }}
+                          {...({} as any)}
                         />
-                        <Line
+                        <RechartsComponents.Line
                           type="monotone"
                           dataKey="motivation"
                           stroke="#3b82f6"
@@ -263,19 +242,21 @@ export function AnalyticsTrendsPanel({
                           dot={{ fill: '#3b82f6', strokeWidth: 2 }}
                           name="Motivation"
                           activeDot={{ r: 8 }}
+                          {...({} as any)}
                         />
                         {showDifficulty && (
-                          <Line
+                          <RechartsComponents.Line
                             type="monotone"
                             dataKey="difficulty"
                             stroke="#10b981"
                             strokeWidth={2}
                             dot={{ fill: '#10b981', strokeWidth: 2 }}
                             name="Difficulty"
+                            {...({} as any)}
                           />
                         )}
-                      </LineChart>
-                    </ResponsiveContainer>
+                      </RechartsComponents.LineChart>
+                    </RechartsComponents.ResponsiveContainer>
                   </div>
                 </TabsContent>
                 
@@ -283,36 +264,41 @@ export function AnalyticsTrendsPanel({
                   <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Completion Breakdown</h4>
                   
                   <div className="h-[300px] w-full bg-white dark:bg-slate-800/50 rounded-lg p-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
+                    <RechartsComponents.ResponsiveContainer width="100%" height="100%">
+                      <RechartsComponents.BarChart
                         data={completionData}
                         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis 
-                          dataKey="name" 
+                        <RechartsComponents.CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <RechartsComponents.XAxis 
+                          dataKey="day" 
                           stroke="#64748b"
                           tick={{ fill: '#64748b' }}
+                          {...({} as any)}
                         />
-                        <YAxis 
+                        <RechartsComponents.YAxis 
                           stroke="#64748b"
                           tick={{ fill: '#64748b' }}
+                          {...({} as any)}
                         />
-                        <Tooltip 
+                        <RechartsComponents.Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#ffffff', 
                             border: '1px solid #e2e8f0',
                             borderRadius: '8px',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                          }} 
+                          }}
+                          {...({} as any)}
                         />
-                        <Bar 
-                          dataKey="value" 
-                          fill="#3b82f6"
+                        <RechartsComponents.Bar 
+                          dataKey="completion" 
+                          fill="#8b5cf6" 
                           radius={[4, 4, 0, 0]}
+                          name="Completion Rate"
+                          {...({} as any)}
                         />
-                      </BarChart>
-                    </ResponsiveContainer>
+                      </RechartsComponents.BarChart>
+                    </RechartsComponents.ResponsiveContainer>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4 mt-4">

@@ -109,8 +109,8 @@ export function ChallengeGrid() {
 
   if (!challenge) return null
 
-  const completedDays = challenge.daily_progress?.filter(day => day.completed).length || 0
-  const progressPercentage = (completedDays / challenge.duration_days) * 100
+  const completedDays = 0 // TODO: Calculate from actual progress data
+  const progressPercentage = (completedDays / (challenge.days?.length || 1)) * 100
 
   return (
     <Card>
@@ -129,22 +129,20 @@ export function ChallengeGrid() {
         <div className="space-y-4">
           <h3 className="font-semibold">Daily Progress</h3>
           <div className="grid grid-cols-7 gap-2">
-            {challenge.daily_progress?.map((day) => {
-              const date = new Date(day.date)
-              const isToday = new Date().toDateString() === date.toDateString()
-              const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
+            {challenge.days?.map((day, index) => {
+              const isCompleted = false // TODO: Get actual completion status
+              const isToday = index === 0 // TODO: Calculate actual current day
 
               return (
                 <Button
-                  key={day.id}
-                  variant={day.completed ? 'default' : 'outline'}
+                  key={day.day}
+                  variant={isCompleted ? 'default' : 'outline'}
                   className={`p-2 h-auto ${isToday ? 'ring-2 ring-primary' : ''}`}
-                  onClick={() => isPast && toggleProgress(day.id, day.completed)}
-                  disabled={!isPast}
+                  onClick={() => {}}
                 >
                   <div className="text-center space-y-1">
-                    <div className="text-xs">{date.getDate()}</div>
-                    {day.completed ? (
+                    <div className="text-xs">{day.day}</div>
+                    {isCompleted ? (
                       <CheckCircle className="w-4 h-4 mx-auto" />
                     ) : (
                       <XCircle className="w-4 h-4 mx-auto" />

@@ -2,17 +2,19 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateChallengePlan, ChallengePlan } from '@/lib/generateChallengePlan'
 
-// Validate environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY')
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
 export async function POST(request: Request) {
+  // Validate environment variables
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return NextResponse.json(
+      { error: 'Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY' },
+      { status: 500 }
+    )
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
   try {
     if (!request.body) {
       return NextResponse.json(
@@ -157,7 +159,7 @@ export async function POST(request: Request) {
       console.error('Error parsing days data:', error);
       console.error('Days data that caused the error:', {
         days_type: typeof plan.days,
-        days_sample: typeof plan.days === 'string' ? plan.days.substring(0, 200) + '...' : JSON.stringify(plan.days).substring(0, 200) + '...'
+        days_sample: typeof plan.days === 'string' ? (plan.days as string).substring(0, 200) + '...' : JSON.stringify(plan.days).substring(0, 200) + '...'
       });
       return NextResponse.json(
         { 

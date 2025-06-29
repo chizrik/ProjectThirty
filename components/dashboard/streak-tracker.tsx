@@ -5,20 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Flame, Award, Target, TrendingUp, Calendar } from 'lucide-react'
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts'
-
-interface DayData {
-  day: number
-  tasks: { task_id: number; title: string; completed: boolean }[]
-  motivation: number
-  reflection: string
-  proof_upload_url: string
-  difficulty_rating: number
-  completion_rating: number
-  timestamp: string
-  status: 'neutral' | 'complete' | 'missed' | 'partial'
-  hasProof: boolean
-  hasReflection: boolean
-}
+import { DayData } from '@/types/challenge'
 
 interface StreakTrackerProps {
   dayData: DayData[]

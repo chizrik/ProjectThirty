@@ -9,13 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Camera, FileText, Search, Filter, Calendar, Star, Download, Eye, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
-import { DayProgress } from '@/types/challenge'
-
-type DayData = DayProgress & {
-  tasks: { task_id: number; title: string; completed: boolean }[]
-  hasProof: boolean
-  hasReflection: boolean
-}
+import { DayProgress, DayData } from '@/types/challenge'
 
 interface ProofsReflectionsProps {
   dayData: DayData[]
@@ -33,7 +27,7 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
     let filtered = dayData.filter(day => {
       // Search filter
       const matchesSearch = searchTerm === '' || 
-        day.reflection.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        day.reflection?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         day.day.toString().includes(searchTerm)
       
       // Type filter
@@ -42,8 +36,8 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
         (filterType === 'proofs' && day.hasProof) ||
         (filterType === 'reflections' && day.hasReflection) ||
         (filterType === 'both' && day.hasProof && day.hasReflection) ||
-        (filterType === 'complete' && day.status === 'complete') ||
-        (filterType === 'high-motivation' && day.motivation >= 8)
+        (filterType === 'complete' && day.status === 'completed') ||
+        (filterType === 'high-motivation' && (day.motivation || 0) >= 8)
       
       return matchesSearch && matchesType && (day.hasProof || day.hasReflection)
     })
@@ -54,11 +48,11 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
         case 'day':
           return b.day - a.day // Most recent first
         case 'motivation':
-          return b.motivation - a.motivation
+          return (b.motivation || 0) - (a.motivation || 0)
         case 'completion':
-          return b.completion_rating - a.completion_rating
+          return (b.completion_rating || 0) - (a.completion_rating || 0)
         case 'difficulty':
-          return b.difficulty_rating - a.difficulty_rating
+          return (b.difficulty_rating || 0) - (a.difficulty_rating || 0)
         default:
           return b.day - a.day
       }
@@ -73,7 +67,7 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
     const daysWithProofs = dayData.filter(d => d.hasProof).length
     const daysWithReflections = dayData.filter(d => d.hasReflection).length
     const daysWithBoth = dayData.filter(d => d.hasProof && d.hasReflection).length
-    const avgMotivation = dayData.filter(d => d.motivation > 0).reduce((sum, d) => sum + d.motivation, 0) / dayData.filter(d => d.motivation > 0).length || 0
+    const avgMotivation = dayData.filter(d => (d.motivation || 0) > 0).reduce((sum, d) => sum + (d.motivation || 0), 0) / dayData.filter(d => (d.motivation || 0) > 0).length || 0
     const totalReflectionWords = dayData.reduce((sum, d) => sum + (d.reflection ? d.reflection.split(' ').length : 0), 0)
     
     return {
@@ -127,7 +121,7 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
       'Has Proof': day.hasProof ? 'Yes' : 'No',
       'Has Reflection': day.hasReflection ? 'Yes' : 'No',
       Reflection: day.reflection,
-      'Proof URL': day.proof_upload_url
+      'Proof URL': day.proof_file
     }))
 
     const csv = [
@@ -273,7 +267,7 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Day {day.day}</CardTitle>
-                    {getStatusBadge(day.status)}
+                    {day.status && getStatusBadge(day.status)}
                   </div>
                   <p className="text-sm text-gray-500">{formatDate(day.day)}</p>
                 </CardHeader>
@@ -285,14 +279,14 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
                         <Camera className="h-4 w-4 text-blue-600" />
                         <span className="text-sm font-medium">Proof Submitted</span>
                       </div>
-                      {day.proof_upload_url && (
+                      {day.proof_file && (
                         <div className="relative h-32 bg-gray-100 rounded-lg overflow-hidden">
                           <Image
-                            src={day.proof_upload_url}
+                            src={day.proof_file}
                             alt={`Day ${day.day} proof`}
                             fill
                             className="object-cover cursor-pointer hover:scale-105 transition-transform"
-                            onClick={() => setSelectedProof(day.proof_upload_url)}
+                            onClick={() => setSelectedProof(day.proof_file || '')}
                           />
                           <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
                             <Eye className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
@@ -319,7 +313,7 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
                   <div className="flex items-center justify-between pt-2 border-t">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs text-gray-500">Motivation:</span>
-                      <Badge variant="outline" className={`text-xs ${getMotivationColor(day.motivation)}`}>
+                      <Badge variant="outline" className={`text-xs ${getMotivationColor(day.motivation || 0)}`}>
                         {day.motivation}/10
                       </Badge>
                     </div>
@@ -350,7 +344,7 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
                         <div className="flex items-center space-x-2">
                           <h3 className="font-medium">Day {day.day}</h3>
                           <span className="text-sm text-gray-500">{formatDate(day.day)}</span>
-                          {getStatusBadge(day.status)}
+                          {day.status && getStatusBadge(day.status)}
                         </div>
                         <div className="flex items-center space-x-2">
                           {day.hasProof && <Camera className="h-4 w-4 text-blue-600" />}
@@ -366,14 +360,14 @@ export default function ProofsReflections({ dayData, challengeTitle }: ProofsRef
                         <div className="flex items-center space-x-4">
                           <span>Motivation: {day.motivation}/10</span>
                           <span>Tasks: {day.tasks.filter(t => t.completed).length}/{day.tasks.length}</span>
-                          {day.difficulty_rating > 0 && <span>Difficulty: {day.difficulty_rating}/10</span>}
-                          {day.completion_rating > 0 && <span>Satisfaction: {day.completion_rating}/10</span>}
+                          {(day.difficulty_rating || 0) > 0 && <span>Difficulty: {day.difficulty_rating}/10</span>}
+                          {(day.completion_rating || 0) > 0 && <span>Satisfaction: {day.completion_rating}/10</span>}
                         </div>
                         {day.hasProof && (
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={() => setSelectedProof(day.proof_upload_url)}
+                            onClick={() => setSelectedProof(day.proof_file || '')}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>

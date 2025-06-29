@@ -10,45 +10,18 @@ import { Calendar } from '@/components/ui/calendar';
 import { CheckCircle2, XCircle, Trophy, Calendar as CalendarIcon, TrendingUp } from 'lucide-react';
 import { Challenge, DayProgress } from '@/types/challenge';
 
-const ResponsiveContainer = dynamic(
-  () => import('recharts').then((mod) => mod.ResponsiveContainer),
-  { ssr: false }
-);
-
-const LineChart = dynamic(
-  () => import('recharts').then((mod) => mod.LineChart),
-  { ssr: false }
-);
-
-const Line = dynamic(
-  () => import('recharts').then((mod) => mod.Line),
-  { ssr: false }
-);
-
-const CartesianGrid = dynamic(
-  () => import('recharts').then((mod) => mod.CartesianGrid),
-  { ssr: false }
-);
-
-const XAxis = dynamic(
-  () => import('recharts').then((mod) => mod.XAxis),
-  { ssr: false }
-);
-
-const YAxis = dynamic(
-  () => import('recharts').then((mod) => mod.YAxis),
-  { ssr: false }
-);
-
-const Tooltip = dynamic(
-  () => import('recharts').then((mod) => mod.Tooltip),
-  { ssr: false }
-);
-
-const Legend = dynamic(
-  () => import('recharts').then((mod) => mod.Legend),
-  { ssr: false }
-);
+const RechartsComponents = {
+  LineChart: dynamic(() => import('recharts').then(mod => ({ default: mod.LineChart })), { ssr: false }),
+  Line: dynamic(() => import('recharts').then(mod => ({ default: mod.Line as any })), { ssr: false }),
+  XAxis: dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis as any })), { ssr: false }),
+  YAxis: dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis as any })), { ssr: false }),
+  CartesianGrid: dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false }),
+  Tooltip: dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip as any })), { ssr: false }),
+  ResponsiveContainer: dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false }),
+  BarChart: dynamic(() => import('recharts').then(mod => ({ default: mod.BarChart })), { ssr: false }),
+  Bar: dynamic(() => import('recharts').then(mod => ({ default: mod.Bar as any })), { ssr: false }),
+  Legend: dynamic(() => import('recharts').then(mod => ({ default: mod.Legend as any })), { ssr: false })
+}
 
 interface AnalyticsPanelProps {
   completionRate: number;
@@ -151,55 +124,63 @@ export function AnalyticsPanel({
         </CardHeader>
         <CardContent>
           <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+            <RechartsComponents.ResponsiveContainer width="100%" height="100%">
+              <RechartsComponents.LineChart
                 data={dailyMotivation}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis 
-                  dataKey="day" 
+                <RechartsComponents.CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <RechartsComponents.XAxis
+                  dataKey="day"
                   stroke="#64748b"
-                  tick={{ fill: '#64748b' }}
+                  fontSize={12}
+                  tickLine={false}
+                  {...({} as any)}
                 />
-                <YAxis 
+                <RechartsComponents.YAxis
                   stroke="#64748b"
-                  tick={{ fill: '#64748b' }}
+                  fontSize={12}
+                  tickLine={false}
+                  {...({} as any)}
                 />
-                <Tooltip 
+                <RechartsComponents.Tooltip 
                   contentStyle={{ 
                     backgroundColor: '#ffffff', 
                     border: '1px solid #e2e8f0',
                     borderRadius: '8px',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }} 
+                  }}
+                  {...({} as any)}
                 />
-                <Legend 
+                <RechartsComponents.Legend 
                   wrapperStyle={{
                     paddingTop: '20px',
                     color: '#64748b'
                   }}
+                  {...({} as any)}
                 />
-                <Line
+                <RechartsComponents.Line
                   type="monotone"
                   dataKey="motivation"
                   stroke="#3b82f6"
                   strokeWidth={2}
                   dot={{ fill: '#3b82f6', strokeWidth: 2 }}
                   name="Users"
+                  {...({} as any)}
                 />
                 {showDifficulty && (
-                  <Line
+                  <RechartsComponents.Line
                     type="monotone"
                     dataKey="difficulty"
                     stroke="#10b981"
                     strokeWidth={2}
                     dot={{ fill: '#10b981', strokeWidth: 2 }}
                     name="Sessions"
+                    {...({} as any)}
                   />
                 )}
-              </LineChart>
-            </ResponsiveContainer>
+              </RechartsComponents.LineChart>
+            </RechartsComponents.ResponsiveContainer>
           </div>
         </CardContent>
       </Card>

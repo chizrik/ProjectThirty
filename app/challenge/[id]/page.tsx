@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle, XCircle, Circle } from 'lucide-react'
 import { DayModal } from '@/components/day-modal'
 import { AnalyticsPanel } from '@/components/analytics/analytics-panel'
-import { ChallengePlan, AnalyticsData } from '@/types/challenge'
+import { ChallengePlan, AnalyticsData, DayStatus } from '@/types/challenge'
 
 interface LocalChallengePlan {
   id: string
@@ -30,12 +30,7 @@ interface LocalChallengePlan {
   }>
 }
 
-interface DayStatus {
-  day: number
-  status: 'completed' | 'missed' | 'inactive'
-  reflection?: string
-  proof_url?: string
-}
+
 
 export default function ChallengePage() {
   const params = useParams()
@@ -111,9 +106,26 @@ export default function ChallengePage() {
         completedDays: dayStatuses.filter(d => d.status === 'completed').length,
         completionRate,
         currentStreak,
-        longestStreak: currentStreak, // You may want to calculate this properly
-        averageReflectionLength: 0, // You may want to calculate this from actual data
-        weeklyProgress: [] // You may want to calculate this from actual data
+        longestStreak: currentStreak,
+        averageReflectionLength: 0,
+        streakCount: currentStreak,
+        missedDays: dayStatuses.filter(d => d.status === 'missed').length,
+        dailyMotivation: dayStatuses.map((status, index) => ({
+          day: index + 1,
+          motivation: status.motivationRating || 0,
+          difficulty: status.difficultyRating || 0
+        })),
+        calendarStatus: dayStatuses.reduce((acc, status, index) => {
+          acc[`day-${index + 1}`] = status.status === 'pending' ? 'missed' : (status.status === 'completed' ? 'completed' : 'missed')
+          return acc
+        }, {} as Record<string, 'completed' | 'missed'>),
+        motivationTrend: dayStatuses.map((status, index) => ({
+          day: index + 1,
+          motivation: status.motivationRating || 0,
+          difficulty: status.difficultyRating || 0,
+          completion: status.completionRating || 0
+        })),
+        weeklyProgress: []
       })
     } catch (error) {
       console.error('Error fetching challenge data:', error)
@@ -245,7 +257,7 @@ export default function ChallengePage() {
               {Array.from({ length: 30 }, (_, i) => {
                 const dayStatus = dayStatuses.find(d => d.day === i + 1)?.status || 'inactive'
                 const hasReflection = dayStatuses.find(d => d.day === i + 1)?.reflection
-                const hasProof = dayStatuses.find(d => d.day === i + 1)?.proof_url
+                const hasProof = dayStatuses.find(d => d.day === i + 1)?.proofUrl
                 
                 return (
                   <motion.div
@@ -307,7 +319,9 @@ export default function ChallengePage() {
           isOpen={true}
           onClose={() => setSelectedDay(null)}
           day={selectedDay}
-          tasks={challengePlan.days[selectedDay - 1].tasks}
+          tasks={challengePlan.days[selectedDay - 1].tasks.map(task => 
+            typeof task === 'string' ? task : task.title || ''
+          )}
           tips={challengePlan.days[selectedDay - 1].tips}
           onSubmit={async (data) => {
             try {
@@ -331,7 +345,13 @@ export default function ChallengePage() {
               // Update local state
               setDayStatuses(prev => [
                 ...prev.filter(d => d.day !== selectedDay),
-                { day: selectedDay, status: 'completed' }
+                { 
+                  day: selectedDay, 
+                  status: 'completed',
+                  hasReflection: false,
+                  hasProof: false,
+                  date: new Date().toISOString().split('T')[0]
+                }
               ])
 
               // Close modal after successful submission

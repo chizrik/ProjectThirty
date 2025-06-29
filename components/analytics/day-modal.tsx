@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { DayProgress } from '@/types/challenge'
+import { DayProgress, DayData } from '@/types/challenge'
 import { 
   Camera, 
   Upload, 
@@ -24,13 +24,15 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Star
+  Star,
+  Calendar
 } from 'lucide-react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Task {
   id: string
+  task_id?: number
   title: string
   description: string
   tip?: string
@@ -42,10 +44,10 @@ interface Task {
 interface DayModalProps {
   isOpen: boolean
   onClose: () => void
-  day: number
+  day: DayData
   challengeId: string
   dayProgress?: DayProgress
-  onProgressUpdate: (progress: DayProgress) => void
+  onProgressUpdate: (progress: DayData) => void | Promise<void>
 }
 
 interface AIFeedback {
@@ -65,13 +67,15 @@ export default function DayModal({
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: '1',
+      task_id: 1,
       title: 'Morning Routine Reset',
       description: 'Complete your optimized morning routine',
       tip: '5-minute journaling can boost clarity',
       completed: false
     },
     {
-      id: '2', 
+      id: '2',
+      task_id: 2,
       title: 'Mindful Movement',
       description: 'Engage in 20 minutes of physical activity',
       tip: 'Even a walk counts as movement',
@@ -79,6 +83,7 @@ export default function DayModal({
     },
     {
       id: '3',
+      task_id: 3,
       title: 'Learning Session',
       description: 'Dedicate time to skill development',
       tip: 'Focus on one specific skill for better results',
@@ -91,6 +96,7 @@ export default function DayModal({
   const [completionRating, setCompletionRating] = useState([8])
   const [proofText, setProofText] = useState('')
   const [proofFile, setProofFile] = useState<File | null>(null)
+  const [reflection, setReflection] = useState('')
   const [aiFeedback, setAiFeedback] = useState<AIFeedback | null>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -218,9 +224,7 @@ export default function DayModal({
         }
       }
 
-      if (proofFileUrl) {
-        progressData.proof_file = proofFileUrl
-      }
+      // Note: proof_file is handled via proof_upload_url in the upsert data
 
       // Upsert progress data
       const { error } = await supabase
@@ -233,14 +237,17 @@ export default function DayModal({
 
       // Update parent component
       onProgressUpdate({
-        day,
-        completed_tasks: tasks.map(t => t.completed),
-        proof_text: proofText,
-        proof_file: proofFileUrl || undefined,
-        completed_at: new Date().toISOString(),
-        motivation_rating: motivationLevel[0],
+        day: day.day,
+        tasks: tasks,
+        motivation: motivationLevel[0],
+        reflection: reflection,
+        proof_file: proofFileUrl || '',
         difficulty_rating: difficultyRating[0],
-        completion_rating: completionRating[0]
+        completion_rating: completionRating[0],
+        timestamp: new Date().toISOString(),
+        status: tasks.every(t => t.completed) ? 'complete' : tasks.some(t => t.completed) ? 'partial' : 'neutral',
+        hasProof: !!proofFileUrl || !!proofText,
+        hasReflection: !!reflection
       })
 
       toast.success('Progress saved successfully!')
@@ -267,7 +274,7 @@ export default function DayModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Day {day}: Reset Your Daily Routine
+            Day {day.day}: Reset Your Daily Routine
             {isCompleted && <CheckCircle className="h-5 w-5 text-green-500" />}
           </DialogTitle>
         </DialogHeader>

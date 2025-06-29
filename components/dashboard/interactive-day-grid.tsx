@@ -5,12 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CheckCircle, XCircle, Circle, FileText, Image } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { DayProgress } from '@/types/challenge'
-
-interface DayTask {
-  task: string
-  tip?: string
-}
+import { DayProgress, DayTask } from '@/types/challenge'
 
 interface Day {
   day: number
@@ -30,17 +25,17 @@ export function InteractiveDayGrid({ days, progress, onDayClick }: InteractiveDa
   // Animation variants for grid items
   const gridItemVariants = {
     initial: { opacity: 0, scale: 0.8 },
-    animate: (index: number) => ({
+    animate: {
       opacity: 1,
-      scale: 1,
-      transition: {
-        delay: index * 0.02, // Staggered animation
-        duration: 0.4,
-        ease: 'easeOut'
-      }
-    }),
+      scale: 1
+    },
     hover: { scale: 1.08, y: -2 },
     tap: { scale: 0.95 }
+  }
+
+  const gridItemTransition = {
+    duration: 0.4,
+    ease: "easeOut" as const
   }
 
   // Calculate current day for highlighting
@@ -95,7 +90,7 @@ export function InteractiveDayGrid({ days, progress, onDayClick }: InteractiveDa
                     ${dayProgress.status === 'missed' 
                       ? 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/10 border-red-300 dark:border-red-700 shadow-red-100 dark:shadow-red-900/20' 
                       : ''}
-                    ${dayProgress.status === 'pending' 
+                    ${(dayProgress.status === 'pending' || !dayProgress.status) 
                       ? 'bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/30 dark:to-slate-800/10 border-slate-300 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-600' 
                       : ''}
                     ${isToday ? 'ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-900' : ''}
@@ -109,6 +104,7 @@ export function InteractiveDayGrid({ days, progress, onDayClick }: InteractiveDa
                   animate="animate"
                   whileHover="hover"
                   whileTap="tap"
+                  transition={gridItemTransition}
                   custom={i}
                 >
                   {/* Day number */}
@@ -128,7 +124,7 @@ export function InteractiveDayGrid({ days, progress, onDayClick }: InteractiveDa
                     {dayProgress.status === 'missed' && (
                       <XCircle className="w-5 h-5 text-red-500 dark:text-red-400" />
                     )}
-                    {dayProgress.status === 'pending' && (
+                    {(dayProgress.status === 'pending' || !dayProgress.status) && (
                       <Circle className="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500" />
                     )}
                   </div>
@@ -139,16 +135,16 @@ export function InteractiveDayGrid({ days, progress, onDayClick }: InteractiveDa
                   )}
                   
                   {/* Indicators for reflection and proof */}
-                  {(dayProgress.hasReflection || dayProgress.hasProof) && (
+                  {('reflection' in dayProgress && dayProgress.reflection) || ('proof_file' in dayProgress && dayProgress.proof_file) || ('proof_text' in dayProgress && dayProgress.proof_text) ? (
                     <div className="absolute bottom-1 right-1 flex gap-1">
-                      {dayProgress.hasReflection && (
+                      {'reflection' in dayProgress && dayProgress.reflection && (
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500" title="Has reflection" />
                       )}
-                      {dayProgress.hasProof && (
+                      {(('proof_file' in dayProgress && dayProgress.proof_file) || ('proof_text' in dayProgress && dayProgress.proof_text)) && (
                         <div className="w-1.5 h-1.5 rounded-full bg-purple-500" title="Has proof" />
                       )}
                     </div>
-                  )}
+                  ) : null}
                 </motion.button>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs">

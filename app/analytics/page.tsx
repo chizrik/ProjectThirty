@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { Challenge, DayProgress, AnalyticsData } from '@/types/challenge'
+import { Challenge, DayProgress, AnalyticsData, DayData, DayTask } from '@/types/challenge'
 import { ChallengePlan } from '@/lib/generateChallengePlan'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -46,45 +46,21 @@ const LineChart = dynamic(
   { ssr: false }
 )
 
-const Line = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Line })),
-  { ssr: false }
-)
-
-const BarChart = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.BarChart })),
-  { ssr: false }
-)
-
-const Bar = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Bar })),
-  { ssr: false }
-)
-
-const CartesianGrid = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.CartesianGrid })),
-  { ssr: false }
-)
-
-const XAxis = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.XAxis })),
-  { ssr: false }
-)
-
-const YAxis = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.YAxis })),
-  { ssr: false }
-)
-
-const Tooltip = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Tooltip })),
-  { ssr: false }
-)
-
-const Legend = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Legend })),
-  { ssr: false }
-)
+const RechartsComponents = {
+  LineChart: dynamic(() => import('recharts').then(mod => ({ default: mod.LineChart })), { ssr: false }),
+  Line: dynamic(() => import('recharts').then(mod => ({ default: mod.Line as any })), { ssr: false }),
+  XAxis: dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis as any })), { ssr: false }),
+  YAxis: dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis as any })), { ssr: false }),
+  CartesianGrid: dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false }),
+  Tooltip: dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip as any })), { ssr: false }),
+  ResponsiveContainer: dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false }),
+  BarChart: dynamic(() => import('recharts').then(mod => ({ default: mod.BarChart })), { ssr: false }),
+  Bar: dynamic(() => import('recharts').then(mod => ({ default: mod.Bar as any })), { ssr: false }),
+  PieChart: dynamic(() => import('recharts').then(mod => ({ default: mod.PieChart })), { ssr: false }),
+  Pie: dynamic(() => import('recharts').then(mod => ({ default: mod.Pie as any })), { ssr: false }),
+  Cell: dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })), { ssr: false }),
+  Legend: dynamic(() => import('recharts').then(mod => ({ default: mod.Legend as any })), { ssr: false })
+}
 
 // DayProgress and Challenge types are imported from @/types/challenge
 
@@ -133,7 +109,7 @@ export default function AnalyticsDashboard() {
   }, [])
 
   useEffect(() => {
-    if (selectedChallenge) {
+    if (selectedChallenge?.id) {
       fetchChallengeProgress(selectedChallenge.id)
     }
   }, [selectedChallenge])
@@ -305,16 +281,31 @@ export default function AnalyticsDashboard() {
     setIsDayModalOpen(false)
   }
 
-  const handleProgressUpdate = (progress: DayProgress) => {
+  const handleProgressUpdate = (progress: DayData) => {
+    // Convert DayData to DayProgress format for state update
+    const dayProgress: DayProgress = {
+      id: `${selectedChallenge?.id}-${progress.day}`,
+      challenge_id: selectedChallenge?.id || '',
+      user_id: '', // Will be set by the backend
+      day: progress.day,
+      completed: progress.status === 'completed',
+      completed_tasks: progress.tasks?.map((t: DayTask) => t.completed || false) || [],
+      proof_text: progress.reflection || '',
+      motivation_rating: progress.motivation || 0,
+      difficulty_rating: progress.difficulty_rating || 0,
+      completion_rating: progress.completion_rating || 0,
+      completed_at: progress.timestamp || new Date().toISOString()
+    }
+    
     setDailyProgress(prev => {
       const updated = prev.filter(p => p.day !== progress.day)
-      updated.push(progress)
+      updated.push(dayProgress)
       return updated.sort((a, b) => a.day - b.day)
     })
     
     // Recalculate analytics with updated data
     const updatedProgress = dailyProgress.filter(p => p.day !== progress.day)
-    updatedProgress.push(progress)
+    updatedProgress.push(dayProgress)
     calculateAnalytics(updatedProgress.sort((a, b) => a.day - b.day))
   }
 
@@ -635,34 +626,37 @@ export default function AnalyticsDashboard() {
                   <TabsContent value="motivation" className="space-y-4">
                     <div className="h-80">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={analyticsData.motivationTrend}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" />
-                          <YAxis domain={[0, 10]} />
-                          <Tooltip />
-                          <Legend />
-                          <Line 
-                            type="monotone" 
-                            dataKey="motivation" 
-                            stroke="#3b82f6" 
-                            strokeWidth={2}
-                            name="Motivation"
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="difficulty" 
-                            stroke="#ef4444" 
-                            strokeWidth={2}
-                            name="Difficulty"
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="completion" 
-                            stroke="#10b981" 
-                            strokeWidth={2}
-                            name="Completion"
-                          />
-                        </LineChart>
+                        <RechartsComponents.LineChart data={analyticsData.motivationTrend}>
+                <RechartsComponents.CartesianGrid strokeDasharray="3 3" />
+                <RechartsComponents.XAxis dataKey="day" {...({} as any)} />
+                <RechartsComponents.YAxis domain={[0, 10]} {...({} as any)} />
+                <RechartsComponents.Tooltip />
+                <RechartsComponents.Legend />
+                <RechartsComponents.Line
+                  type="monotone"
+                  dataKey="motivation"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  name="Motivation"
+                  {...({} as any)}
+                />
+                <RechartsComponents.Line
+                  type="monotone"
+                  dataKey="difficulty"
+                  stroke="#ef4444"
+                  strokeWidth={2}
+                  name="Difficulty"
+                  {...({} as any)}
+                />
+                <RechartsComponents.Line
+                  type="monotone"
+                  dataKey="completion"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  name="Completion"
+                  {...({} as any)}
+                />
+              </RechartsComponents.LineChart>
                       </ResponsiveContainer>
                     </div>
                   </TabsContent>
@@ -670,15 +664,15 @@ export default function AnalyticsDashboard() {
                   <TabsContent value="weekly" className="space-y-4">
                     <div className="h-80">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={analyticsData.weeklyProgress}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="week" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="completed" fill="#10b981" name="Completed" />
-                          <Bar dataKey="missed" fill="#ef4444" name="Missed" />
-                        </BarChart>
+                        <RechartsComponents.BarChart data={analyticsData.weeklyProgress}>
+                <RechartsComponents.CartesianGrid strokeDasharray="3 3" />
+                <RechartsComponents.XAxis dataKey="week" {...({} as any)} />
+                <RechartsComponents.YAxis />
+                <RechartsComponents.Tooltip />
+                <RechartsComponents.Legend />
+                <RechartsComponents.Bar dataKey="completed" fill="#10b981" name="Completed" {...({} as any)} />
+                <RechartsComponents.Bar dataKey="missed" fill="#ef4444" name="Missed" {...({} as any)} />
+              </RechartsComponents.BarChart>
                       </ResponsiveContainer>
                     </div>
                   </TabsContent>
@@ -871,8 +865,15 @@ export default function AnalyticsDashboard() {
         <DayModal
           isOpen={isDayModalOpen}
           onClose={closeDayModal}
-          day={selectedDay}
-          challengeId={selectedChallenge.id}
+          day={{
+            day: selectedDay,
+            tasks: (selectedChallenge as any).days?.[selectedDay - 1]?.tasks?.map((task: any, index: number) => ({
+              task_id: index + 1,
+              title: typeof task === 'string' ? task : task.title || task,
+              completed: false
+            })) || []
+          }}
+          challengeId={selectedChallenge?.id || ''}
           dayProgress={dailyProgress.find(p => p.day === selectedDay)}
           onProgressUpdate={handleProgressUpdate}
         />

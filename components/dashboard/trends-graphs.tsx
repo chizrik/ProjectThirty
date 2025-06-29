@@ -4,21 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ScatterChart, Scatter } from 'recharts'
 import { TrendingUp, BarChart3, Activity, Calendar } from 'lucide-react'
-import { DayProgress } from '@/types/challenge'
-
-interface DayData {
-  day: number
-  tasks: { task_id: number; title: string; completed: boolean }[]
-  motivation: number
-  reflection: string
-  proof_upload_url: string
-  difficulty_rating: number
-  completion_rating: number
-  timestamp: string
-  status: 'neutral' | 'complete' | 'missed' | 'partial'
-  hasProof: boolean
-  hasReflection: boolean
-}
+import { DayProgress, DayData } from '@/types/challenge'
 
 interface TrendsGraphsProps {
   dayData: DayData[]
@@ -56,15 +42,15 @@ export default function TrendsGraphs({ dayData }: TrendsGraphsProps) {
     
     const activeDays = weekDays.filter(d => d.status !== 'neutral')
     const avgMotivation = activeDays.length > 0 
-      ? activeDays.reduce((sum, day) => sum + day.motivation, 0) / activeDays.length
+      ? activeDays.reduce((sum, day) => sum + (day.motivation || 0), 0) / activeDays.length
       : 0
     
     const avgDifficulty = activeDays.length > 0
-      ? activeDays.reduce((sum, day) => sum + day.difficulty_rating, 0) / activeDays.length
+      ? activeDays.reduce((sum, day) => sum + (day.difficulty_rating || 0), 0) / activeDays.length
       : 0
     
     const avgCompletion = activeDays.length > 0
-      ? activeDays.reduce((sum, day) => sum + day.completion_rating, 0) / activeDays.length
+      ? activeDays.reduce((sum, day) => sum + (day.completion_rating || 0), 0) / activeDays.length
       : 0
     
     const completedDays = weekDays.filter(d => d.status === 'complete').length
@@ -92,7 +78,7 @@ export default function TrendsGraphs({ dayData }: TrendsGraphsProps) {
   }))
 
   // Streak analysis data
-  const streakData = []
+  const streakData: Array<{ day: number; streak: number; status: string }> = []
   let currentStreak = 0
   let longestStreak = 0
   
@@ -107,7 +93,7 @@ export default function TrendsGraphs({ dayData }: TrendsGraphsProps) {
     streakData.push({
       day: day.day,
       streak: currentStreak,
-      status: day.status
+      status: day.status || 'pending'
     })
   })
 
@@ -188,11 +174,11 @@ export default function TrendsGraphs({ dayData }: TrendsGraphsProps) {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={[
-                    { range: '1-2', count: motivationData.filter(d => d.motivation <= 2).length },
-                    { range: '3-4', count: motivationData.filter(d => d.motivation > 2 && d.motivation <= 4).length },
-                    { range: '5-6', count: motivationData.filter(d => d.motivation > 4 && d.motivation <= 6).length },
-                    { range: '7-8', count: motivationData.filter(d => d.motivation > 6 && d.motivation <= 8).length },
-                    { range: '9-10', count: motivationData.filter(d => d.motivation > 8).length }
+                    { range: '1-2', count: motivationData.filter(d => (d.motivation || 0) <= 2).length },
+                    { range: '3-4', count: motivationData.filter(d => (d.motivation || 0) > 2 && (d.motivation || 0) <= 4).length },
+                    { range: '5-6', count: motivationData.filter(d => (d.motivation || 0) > 4 && (d.motivation || 0) <= 6).length },
+                    { range: '7-8', count: motivationData.filter(d => (d.motivation || 0) > 6 && (d.motivation || 0) <= 8).length },
+                    { range: '9-10', count: motivationData.filter(d => (d.motivation || 0) > 8).length }
                   ]}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="range" />
@@ -365,13 +351,13 @@ export default function TrendsGraphs({ dayData }: TrendsGraphsProps) {
                 <div className="p-4 bg-green-50 rounded-lg">
                   <h4 className="font-medium text-green-800 mb-2">High Performance Days</h4>
                   <p className="text-sm text-green-700">
-                    Days with motivation ≥ 7: {motivationData.filter(d => d.motivation >= 7).length} days
+                    Days with motivation ≥ 7: {motivationData.filter(d => (d.motivation || 0) >= 7).length} days
                   </p>
                   <p className="text-sm text-green-700">
                     Average completion on high motivation days: {Math.round(
-                      motivationData.filter(d => d.motivation >= 7)
-                        .reduce((sum, d) => sum + d.completion, 0) / 
-                      Math.max(motivationData.filter(d => d.motivation >= 7).length, 1) * 10
+                      motivationData.filter(d => (d.motivation || 0) >= 7)
+                        .reduce((sum, d) => sum + (d.completion || 0), 0) / 
+                      Math.max(motivationData.filter(d => (d.motivation || 0) >= 7).length, 1) * 10
                     ) / 10}/10
                   </p>
                 </div>
@@ -380,13 +366,13 @@ export default function TrendsGraphs({ dayData }: TrendsGraphsProps) {
                 <div className="p-4 bg-red-50 rounded-lg">
                   <h4 className="font-medium text-red-800 mb-2">Challenging Days</h4>
                   <p className="text-sm text-red-700">
-                    Days with difficulty ≥ 7: {motivationData.filter(d => d.difficulty >= 7).length} days
+                    Days with difficulty ≥ 7: {motivationData.filter(d => (d.difficulty || 0) >= 7).length} days
                   </p>
                   <p className="text-sm text-red-700">
                     Average motivation on difficult days: {Math.round(
-                      motivationData.filter(d => d.difficulty >= 7)
-                        .reduce((sum, d) => sum + d.motivation, 0) / 
-                      Math.max(motivationData.filter(d => d.difficulty >= 7).length, 1) * 10
+                      motivationData.filter(d => (d.difficulty || 0) >= 7)
+                        .reduce((sum, d) => sum + (d.motivation || 0), 0) / 
+                      Math.max(motivationData.filter(d => (d.difficulty || 0) >= 7).length, 1) * 10
                     ) / 10}/10
                   </p>
                 </div>

@@ -10,7 +10,7 @@ import { ProgressStreakControls } from './progress-streak-controls'
 import { AnalyticsTrendsPanel } from './analytics-trends-panel'
 import { ProofsReflectionsHub } from './proofs-reflections-hub'
 import { SettingsToolsPanel } from './settings-tools-panel'
-import { Challenge, DayProgress } from '@/types/challenge'
+import { Challenge, DayProgress, DayTask, DayStatus } from '@/types/challenge'
 import { ChallengePlan } from '@/lib/generateChallengePlan'
 
 // Initialize Supabase client
@@ -46,19 +46,6 @@ interface LocalChallengePlan {
     time_per_day: number
   }
   created_at?: string
-}
-
-interface DayStatus {
-  day: number
-  date: string
-  status: 'completed' | 'missed' | 'pending'
-  completedTasks: number[]
-  reflection?: string
-  proofUrl?: string
-  proofType?: 'image' | 'video' | 'link'
-  motivationRating?: number
-  difficultyRating?: number
-  completionRating?: number
 }
 
 interface AnalyticsData {
@@ -166,7 +153,7 @@ export function ChallengeDashboard() {
         // Initialize day statuses
         const statuses: DayStatus[] = Array.from({ length: 30 }, (_, i) => {
           const dayNumber = i + 1
-          const startDate = new Date(plan.created_at || new Date().toISOString())
+          const startDate = new Date() // TODO: Get actual challenge start date
           const dayDate = new Date(startDate)
           dayDate.setDate(startDate.getDate() + i)
           
@@ -178,6 +165,8 @@ export function ChallengeDashboard() {
               day: dayNumber,
               date: dayDate.toISOString(),
               status: existingProgress.completed ? 'completed' : existingProgress.missed ? 'missed' : 'pending',
+              hasReflection: !!existingProgress.reflection,
+              hasProof: !!existingProgress.proof_url,
               completedTasks: existingProgress.completed_tasks || [],
               reflection: existingProgress.reflection,
               proofUrl: existingProgress.proof_url,
@@ -198,6 +187,8 @@ export function ChallengeDashboard() {
             day: dayNumber,
             date: dayDate.toISOString(),
             status: dayDateNormalized < today ? 'missed' : 'pending',
+            hasReflection: false,
+            hasProof: false,
             completedTasks: []
           }
         })
@@ -241,10 +232,17 @@ export function ChallengeDashboard() {
           user_id: '',
           title: 'Challenge Not Found',
           description: 'This challenge could not be loaded. Please check if it exists or try creating a new one.',
-          category: 'General',
           days: [],
+          metrics: {
+            success_likelihood: 0,
+            effort_level: 'low',
+            time_per_day: 0,
+            difficulty_level: 'easy'
+          },
+          specific_goals: [],
+          potential_obstacles: [],
           created_at: new Date().toISOString()
-        });
+        } as ChallengePlan);
       } finally {
         setIsLoading(false);
       }
@@ -346,7 +344,7 @@ export function ChallengeDashboard() {
   
   // Handle day submission
   const handleDaySubmit = async (day: number, data: {
-    completedTasks: number[],
+    completedTasks: string[],
     reflection?: string,
     proofUrl?: string,
     proofType?: 'image' | 'video' | 'link',
@@ -381,18 +379,18 @@ export function ChallengeDashboard() {
           if (status.day === day) {
             return {
               ...status,
-              status: data.completedTasks.length > 0 ? 'completed' : 'pending',
-              completedTasks: data.completedTasks,
+              status: (data.completedTasks.length > 0 ? 'completed' : 'pending') as 'completed' | 'missed' | 'pending',
+              completedTasks: data.completedTasks.map(Number),
               reflection: data.reflection,
               proofUrl: data.proofUrl,
               proofType: data.proofType,
               motivationRating: data.motivationRating,
               difficultyRating: data.difficultyRating,
               completionRating: data.completionRating
-            }
+            } as DayStatus
           }
           return status
-        })
+        }) as DayStatus[]
         
         // Recalculate analytics with updated statuses
         calculateAnalytics(updated)
@@ -437,7 +435,7 @@ export function ChallengeDashboard() {
       if (challengePlan) {
         const resetStatuses: DayStatus[] = Array.from({ length: 30 }, (_, i) => {
           const dayNumber = i + 1
-          const startDate = new Date(challengePlan.createdAt)
+          const startDate = new Date() // TODO: Get actual challenge start date
           const dayDate = new Date(startDate)
           dayDate.setDate(startDate.getDate() + i)
           
@@ -451,7 +449,9 @@ export function ChallengeDashboard() {
             day: dayNumber,
             date: dayDate.toISOString(),
             status: dayDateNormalized < today ? 'missed' : 'pending',
-            completedTasks: []
+            completedTasks: [],
+            hasReflection: false,
+            hasProof: false
           }
         })
         
@@ -475,7 +475,7 @@ export function ChallengeDashboard() {
       day.day,
       new Date(day.date).toLocaleDateString(),
       day.status,
-      day.completedTasks.length,
+      day.completedTasks?.length || 0,
       day.motivationRating || '',
       day.difficultyRating || '',
       day.reflection ? `"${day.reflection.replace(/"/g, '""')}"` : ''
@@ -581,10 +581,10 @@ export function ChallengeDashboard() {
         <ChallengeOverviewPanel 
           title={challengePlan.title}
           description={challengePlan.description}
-          category={challengePlan.category || 'General'}
-          summary={challengePlan.summary}
+          category={'General'}
+          summary={challengePlan.description || ''}
           successLikelihood={challengePlan.metrics?.success_likelihood || 0}
-          difficultyLevel={challengePlan.difficultyLevel || 30}
+          difficultyLevel={30}
           timePerDay={challengePlan.metrics?.time_per_day || 0}
         />
         
@@ -592,19 +592,41 @@ export function ChallengeDashboard() {
         <ProgressStreakControls 
           completedDays={analyticsData.completedCount}
           totalDays={30}
-          streakCount={analyticsData.streakCount}
+          currentStreak={analyticsData.streakCount}
           longestStreak={analyticsData.longestStreak}
-          endDate={new Date(dayStatuses[29].date)}
+          endDate={dayStatuses[29].date}
         />
         
         {/* Interactive Day Grid */}
         <InteractiveDayGrid 
-          days={challengePlan.days}
+          days={challengePlan.days.map(day => ({
+            day: day.day,
+            tasks: Array.isArray(day.tasks) && typeof day.tasks[0] === 'string' 
+              ? (day.tasks as string[]).map((task: string, index: number) => ({
+                  task_id: index + 1,
+                  title: task,
+                  task: task,
+                  completed: false
+                }))
+              : Array.isArray(day.tasks) && day.tasks.length > 0 && typeof day.tasks[0] === 'object'
+                ? (day.tasks as unknown as DayTask[]).map(task => ({
+                    ...task,
+                    task: task.task || (task as any).title || task.task
+                  }))
+                : [],
+            bonus_task: day.bonus_task
+          }))}
           progress={dayStatuses.map(status => ({
+            id: `progress-${status.day}`,
+            challenge_id: challengePlan.id || '',
+            user_id: '',
             day: status.day,
-            status: status.status,
-            hasReflection: !!status.reflection,
-            hasProof: !!status.proofUrl
+            completed: status.status === 'completed',
+            completed_tasks: status.completedTasks?.map(() => true),
+            proof_file: status.proofUrl,
+            proof_text: status.reflection,
+            motivation_rating: status.motivationRating,
+            difficulty_rating: status.difficultyRating
           }))}
           onDayClick={handleDayClick}
         />
@@ -621,7 +643,9 @@ export function ChallengeDashboard() {
             { name: 'Missed', value: analyticsData.missedCount, color: '#ef4444' },
             { name: 'Pending', value: analyticsData.pendingCount, color: '#6b7280' }
           ]}
-          calendarStatus={analyticsData.calendarStatus}
+          calendarStatus={Object.fromEntries(
+            Object.entries(analyticsData.calendarStatus).filter(([_, status]) => status !== 'pending')
+          ) as Record<string, 'completed' | 'missed'>}
           weeklyInsight="Keep up the great work! Your consistency is improving."
         />
         
@@ -634,10 +658,13 @@ export function ChallengeDashboard() {
             isOpen={selectedDay !== null}
             onClose={() => setSelectedDay(null)}
             day={selectedDay}
-            date={dayStatuses[selectedDay - 1].date}
-            tasks={challengePlan.days[selectedDay - 1].tasks}
+            tasks={challengePlan.days[selectedDay - 1].tasks.map((task, index) => ({
+              task_id: index + 1,
+              title: task,
+              completed: false
+            })) || []}
             initialData={{
-              completedTasks: dayStatuses[selectedDay - 1].completedTasks,
+              completedTasks: dayStatuses[selectedDay - 1].completedTasks || [],
               reflection: dayStatuses[selectedDay - 1].reflection,
               proofUrl: dayStatuses[selectedDay - 1].proofUrl,
               proofType: dayStatuses[selectedDay - 1].proofType,

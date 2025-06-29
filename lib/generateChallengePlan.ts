@@ -8,6 +8,7 @@ interface ChallengePlanInput {
 }
 
 export interface ChallengePlan {
+  id?: string
   title: string
   description: string
   metrics: {
@@ -15,6 +16,8 @@ export interface ChallengePlan {
     effort_level: string
     time_per_day: number
     difficulty_level: string
+    specific_goals?: string[]
+    potential_obstacles?: string[]
   }
   specific_goals: string[]
   potential_obstacles: string[]
@@ -122,7 +125,7 @@ export async function generateChallengePlan(input: ChallengePlanInput) {
     const plan: ChallengePlan = JSON.parse(trimmedContent)
     
     // Validate required fields
-    const requiredFields = ['title', 'description', 'metrics', 'days', 'specific_goals', 'potential_obstacles']
+    const requiredFields: (keyof ChallengePlan)[] = ['title', 'description', 'metrics', 'days', 'specific_goals', 'potential_obstacles']
     const missingFields = requiredFields.filter(field => !plan[field])
     
     if (missingFields.length > 0) {
@@ -173,6 +176,6 @@ export async function generateChallengePlan(input: ChallengePlanInput) {
     if (e instanceof SyntaxError) {
       throw new Error('Failed to generate valid JSON plan. The response format was invalid.')
     }
-    throw new Error(e.message || 'Failed to generate valid plan. Please try again.')
+    throw new Error((e as Error).message || 'Failed to generate valid plan. Please try again.')
   }
 }

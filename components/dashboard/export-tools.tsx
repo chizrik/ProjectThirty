@@ -24,20 +24,7 @@ import {
 } from 'lucide-react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { toast } from 'sonner'
-
-interface DayData {
-  day: number
-  tasks: { task_id: number; title: string; completed: boolean }[]
-  motivation: number
-  reflection: string
-  proof_upload_url: string
-  difficulty_rating: number
-  completion_rating: number
-  timestamp: string
-  status: 'neutral' | 'complete' | 'missed' | 'partial'
-  hasProof: boolean
-  hasReflection: boolean
-}
+import { DayData } from '@/types/challenge'
 
 interface ExportToolsProps {
   dayData: DayData[]
@@ -72,7 +59,7 @@ export default function ExportTools({
     completedDays: dayData.filter(d => d.status === 'complete').length,
     daysWithProofs: dayData.filter(d => d.hasProof).length,
     daysWithReflections: dayData.filter(d => d.hasReflection).length,
-    avgMotivation: Math.round((dayData.reduce((sum, d) => sum + d.motivation, 0) / dayData.length) * 10) / 10,
+    avgMotivation: Math.round((dayData.reduce((sum, d) => sum + (d.motivation || 0), 0) / dayData.length) * 10) / 10,
     totalTasks: dayData.reduce((sum, d) => sum + d.tasks.length, 0),
     completedTasks: dayData.reduce((sum, d) => sum + d.tasks.filter(t => t.completed).length, 0)
   }
@@ -129,7 +116,7 @@ export default function ExportTools({
       }
       
       if (exportOptions.includeProofs) {
-        row.push(day.hasProof ? 'Yes' : 'No', day.proof_upload_url || '')
+        row.push(day.hasProof ? 'Yes' : 'No', day.proof_file || '')
       }
       
       if (exportOptions.includeReflections) {
@@ -185,7 +172,7 @@ export default function ExportTools({
         }
         
         if (exportOptions.includeProofs && day.hasProof) {
-          dayExport.proof_url = day.proof_upload_url
+          dayExport.proof_url = day.proof_file
         }
         
         if (exportOptions.includeReflections && day.hasReflection) {

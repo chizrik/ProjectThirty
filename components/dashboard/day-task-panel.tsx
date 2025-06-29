@@ -13,13 +13,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Loader2, Upload, Star, CheckCircle, FileText, Image, Calendar } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import confetti from 'canvas-confetti'
-import { DayProgress } from '@/types/challenge'
-
-interface DayTask {
-  task: string
-  tip?: string
+// Type declaration for canvas-confetti
+interface ConfettiOptions {
+  particleCount?: number
+  spread?: number
+  origin?: { y: number }
 }
+
+const confetti: (options?: ConfettiOptions) => Promise<null> = require('canvas-confetti')
+import { DayProgress, DayTask } from '@/types/challenge'
 
 interface DayTaskPanelProps {
   isOpen: boolean
@@ -27,6 +29,15 @@ interface DayTaskPanelProps {
   day: number
   tasks: DayTask[]
   bonus_task?: string
+  initialData?: {
+    completedTasks: number[]
+    reflection?: string
+    proofUrl?: string
+    proofType?: 'link' | 'video' | 'image'
+    motivationRating?: number
+    difficultyRating?: number
+    completionRating?: number
+  }
   onSubmit: (data: {
     completedTasks: string[]
     reflection: string
@@ -44,15 +55,16 @@ export function DayTaskPanel({
   day,
   tasks,
   bonus_task,
+  initialData,
   onSubmit,
   isMobile = false
 }: DayTaskPanelProps) {
-  const [completedTasks, setCompletedTasks] = useState<string[]>([])
-  const [reflection, setReflection] = useState('')
-  const [proofUrl, setProofUrl] = useState('')
-  const [motivationRating, setMotivationRating] = useState(5)
-  const [difficultyRating, setDifficultyRating] = useState(5)
-  const [completionRating, setCompletionRating] = useState(5)
+  const [completedTasks, setCompletedTasks] = useState<string[]>(initialData?.completedTasks?.map(String) || [])
+  const [reflection, setReflection] = useState(initialData?.reflection || '')
+  const [proofUrl, setProofUrl] = useState(initialData?.proofUrl || '')
+  const [motivationRating, setMotivationRating] = useState(initialData?.motivationRating || 5)
+  const [difficultyRating, setDifficultyRating] = useState(initialData?.difficultyRating || 5)
+  const [completionRating, setCompletionRating] = useState(initialData?.completionRating || 5)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const [activeTab, setActiveTab] = useState('tasks')
@@ -121,12 +133,12 @@ export function DayTaskPanel({
                 >
                   <Checkbox
                     id={`task-${index}`}
-                    checked={completedTasks.includes(task.task)}
+                    checked={completedTasks.includes(task.title)}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setCompletedTasks([...completedTasks, task.task])
+                        setCompletedTasks([...completedTasks, task.title])
                       } else {
-                        setCompletedTasks(completedTasks.filter(t => t !== task.task))
+                        setCompletedTasks(completedTasks.filter(t => t !== task.title))
                       }
                     }}
                     className="mt-1"
@@ -134,13 +146,10 @@ export function DayTaskPanel({
                   <div className="space-y-1 flex-1">
                     <Label 
                       htmlFor={`task-${index}`}
-                      className={`text-sm font-medium ${completedTasks.includes(task.task) ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}
+                      className={`text-sm font-medium ${completedTasks.includes(task.title) ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}
                     >
-                      {task.task}
+                      {task.title}
                     </Label>
-                    {task.tip && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{task.tip}</p>
-                    )}
                   </div>
                 </motion.div>
               ))}
